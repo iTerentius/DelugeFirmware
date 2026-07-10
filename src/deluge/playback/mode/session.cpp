@@ -1199,7 +1199,7 @@ renderAndGetOut:
 	}
 }
 
-void Session::armSection(uint8_t section, int32_t buttonPressLatency) {
+void Session::armSection(uint8_t section, int32_t buttonPressLatency, bool forceImmediate) {
 
 	// Get rid of soloing. And if we're not a "share" section, get rid of arming too
 	currentSong->turnSoloingIntoJustPlaying(currentSong->sections[section].numRepetitions >= 0);
@@ -1247,8 +1247,8 @@ yupThatsFine:
 	// Or if Deluge playing
 	else {
 		userWantsToArmClipsToStartOrSolo(
-		    section, nullptr, stopAllOtherClips, false,
-		    false); // Don't allow "late start". It's too fiddly to implement, and rarely even useful for sections
+		    section, nullptr, stopAllOtherClips, forceImmediate,
+		    false); // Late start disabled for pad presses; enabled when forceImmediate=true (e.g. MIDI trigger)
 
 		if (currentSong->sections[section].numRepetitions != LAUNCH_EXCLUSIVE) {
 			lastSectionArmed = section;

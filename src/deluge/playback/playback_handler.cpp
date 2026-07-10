@@ -2969,7 +2969,7 @@ bool PlaybackHandler::offerNoteToLearnedThings(MIDICable& cable, bool on, int32_
 				if (arrangement.hasPlaybackActive()) {
 					switchToSession();
 				}
-				session.armSection(s, kMIDIKeyInputLatency);
+				session.armSection(s, kMIDIKeyInputLatency, true);
 			}
 			foundAnything = true;
 		}
@@ -2987,8 +2987,20 @@ bool PlaybackHandler::offerNoteToLearnedThings(MIDICable& cable, bool on, int32_
 					switchToSession();
 				}
 
-				// Beware - calling this might insert or delete a Clip!
-				session.toggleClipStatus(clip, &c, false, kMIDIKeyInputLatency);
+				// Only launch if clip isn't already playing or armed — avoids toggling off when
+				// a sequencer repeatedly fires the same note (e.g. Norns/Arcologies).
+				if (!clip->activeIfNoSolo && clip->armState == ArmState::OFF) {
+					if (playbackHandler.isEitherClockActive()) {
+						// Direct immediate launch from position 0, bypassing quantization and
+						// launch-style gating (toggleClipStatus skips ONCE/FILL clips on forceLateStart).
+						uint32_t pos = (uint32_t)playbackHandler.getNumSwungTicksInSinceLastActionedSwungTick();
+						session.armClipToStartOrSoloUsingQuantization(clip, true, pos);
+					}
+					else {
+						// No clock running — fall back to normal toggle which will restart playback.
+						session.toggleClipStatus(clip, &c, false, kMIDIKeyInputLatency);
+					}
+				}
 
 				// use root UI in case this is called from performance view
 				sessionView.requestRendering(getRootUI(), 0, 0xFFFFFFFF);
