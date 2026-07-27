@@ -8,6 +8,7 @@ on:
 
 jobs:
   beta-detect:
+    if: github.repository == 'SynthstromAudible/DelugeFirmware'
     runs-on: ubuntu-latest
     outputs:
       new-commits: ${{ steps.count-commits.outputs.count }}
@@ -30,7 +31,7 @@ jobs:
   beta-build:
     uses: ./.github/workflows/build.yml
     needs: beta-detect
-    if: needs.beta-detect.outputs.new-commits > 0
+    if: github.repository == 'SynthstromAudible/DelugeFirmware' && needs.beta-detect.outputs.new-commits > 0
     with:
       firmware-retention-days: 30
       build-type: "Release"
@@ -39,6 +40,7 @@ jobs:
   beta-publish:
     uses: ./.github/workflows/publish.yml
     needs: beta-build
+    if: github.repository == 'SynthstromAudible/DelugeFirmware'
     with:
       tag: "beta"
       branch: "main"
