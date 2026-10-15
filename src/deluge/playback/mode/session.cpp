@@ -2246,6 +2246,12 @@ yeahNahItsOn:
 
 					giveClipOpportunityToBeginLinearRecording(clip, c, buttonPressLatency);
 
+					// A ONCE clip that starts with playback (e.g. launched with nothing else playing) never passes
+					// through doLaunch(), so arm it to stop here too, otherwise it would loop forever
+					if (clip->launchStyle == LaunchStyle::ONCE && clip->armState == ArmState::OFF) {
+						clip->armState = ArmState::ON_NORMAL;
+					}
+
 					if (clip->armState == ArmState::ON_NORMAL) { // Rohan: What's this for again? Auto arming of
 						                                         // sections? I think not linear recording...
 						distanceTilLaunchEvent = std::max(distanceTilLaunchEvent, clip->loopLength);
