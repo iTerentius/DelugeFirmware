@@ -141,7 +141,6 @@ void KeyboardLayoutVelocityDrums::renderPads(RGB image[][kDisplayWidth + kSideBa
 	// D_PRINTLN("render pads");
 	uint32_t highest_clip_note = getHighestClipNote();
 	uint32_t offset = getState().drums.scroll_offset;
-	uint32_t offset2 = getCurrentInstrumentClip()->colourOffset + 60;
 	uint32_t zoom_level = getState().drums.zoom_level;
 	uint32_t edge_size_x = zoom_arr[zoom_level][0];
 	uint32_t edge_size_y = zoom_arr[zoom_level][1];
@@ -162,7 +161,8 @@ void KeyboardLayoutVelocityDrums::renderPads(RGB image[][kDisplayWidth + kSideBa
 		uint32_t y = padY * edge_size_y;
 		for (uint32_t padX = 0; padX < pads_per_row; ++padX) {
 			uint32_t x = padX * edge_size_x;
-			RGB note_colour = RGB::fromHue((note * 14 + (note % 2 == 1) * 107 + offset2) % 192);
+			// Same colour as the drum's row in the clip view, so row colours carry over to the keyboard
+			RGB note_colour = getNoteColour(note);
 			bool note_enabled = currentNotesState.noteEnabled(note);
 			// Dim the active notes
 			// Brighter by default makes the pads more visible in daylight and allows for the full gradient.
